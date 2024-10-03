@@ -1,0 +1,42 @@
+#!/bin/bash -l
+
+
+
+#$ -S /bin/bash
+#$ -l h_rt=12:0:0 
+#$ -l mem=20G
+#$ -pe smp 1
+#$ -N RICHARD
+#$ -wd /home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw
+
+
+## qsub -t 1-20 3_bamcompare.qsub
+
+
+module load deeptools/3.0.2 
+
+
+number=$SGE_TASK_ID
+paramfile="/home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw/samples_paired.txt"
+
+
+sample=`sed -n ${number}p $paramfile | awk '{print $1}'`
+input=`sed -n ${number}p $paramfile | awk '{print $2}'`
+
+
+bamCompare --bamfile1 CLAPAnalysis_output2/${sample}.merged.mapped.hs.bam \
+	--bamfile2 CLAPAnalysis_output2/${input}.merged.mapped.hs.bam \
+	-o CLAPAnalysis_output2/${sample}.merged.mapped.hs.inputnormalised.bw \
+	--binSize 10 \
+	--normalizeUsing RPKM \
+	--effectiveGenomeSize 2805636231 \
+	--extendReads
+
+bamCompare --bamfile1 CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam \
+	--bamfile2 CLAPAnalysis_output2/${input}.merged.mapped.mm.bam \
+	-o CLAPAnalysis_output2/${sample}.merged.mapped.mm.inputnormalised.bw \
+	--binSize 10 \
+	--normalizeUsing RPKM \
+	--effectiveGenomeSize 2467481008 \
+	--extendReads
+
