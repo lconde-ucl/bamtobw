@@ -30,6 +30,7 @@ bamCompare --bamfile1 CLAPAnalysis_output2/${sample}.merged.mapped.hs.bam \
 	--binSize 10 \
 	--normalizeUsing RPKM \
 	--effectiveGenomeSize 2805636231 \
+	--ignoreForNormalization chrX chrY \
 	--extendReads
 
 bamCompare --bamfile1 CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam \
@@ -38,5 +39,6 @@ bamCompare --bamfile1 CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam \
 	--binSize 10 \
 	--normalizeUsing RPKM \
 	--effectiveGenomeSize 2467481008 \
+	--ignoreForNormalization chrX chrY \
 	--extendReads
 
