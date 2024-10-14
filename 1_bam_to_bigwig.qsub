@@ -37,9 +37,10 @@ samtools view -h CLAPAnalysis_output2/${sample}.merged.mapped.bam \
 #- this still includes all the weird chrs in the header, so delete these
 perl -p -i -e 's/^.*human\:.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
 perl -p -i -e 's/^.*mouse.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
-perl -p -i -e 's/^.*chr[A-Za-z].*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
 perl -p -i -e 's/^.*random.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
-perl -p -i -e 's/^.*v1_human.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
+perl -p -i -e 's/^.*chrM.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
+perl -p -i -e 's/^.*chrUn.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
+perl -p -i -e 's/^.*chrE.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
 
 #- remove the trailing "_human"
 perl -p -i -e 's/_human//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
@@ -85,7 +86,7 @@ samtools view -h CLAPAnalysis_output2/${sample}.merged.mapped.bam \
 #- this still includes all the weird chrs in the header, so delete these
 perl -p -i -e 's/^.*mouse\:.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.mm.sam
 perl -p -i -e 's/^.*human.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.mm.sam
-perl -p -i -e 's/^.*chr[A-Za-z].*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.mm.sam
+perl -p -i -e 's/^.*chrM.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
 
 #- remove the trailing "_mouse"
 perl -p -i -e 's/_mouse//g' CLAPAnalysis_output2/${sample}.merged.mapped.mm.sam
