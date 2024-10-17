@@ -27,18 +27,22 @@ input=`sed -n ${number}p $paramfile | awk '{print $2}'`
 bamCompare --bamfile1 CLAPAnalysis_output2/${sample}.merged.mapped.hs.bam \
 	--bamfile2 CLAPAnalysis_output2/${input}.merged.mapped.hs.bam \
 	-o CLAPAnalysis_output2/${sample}.merged.mapped.hs.inputnormalised.bw \
-	--binSize 10 \
-	--normalizeUsing RPKM \
+	--binSize 100 \
+	--normalizeUsing CPM \
 	--effectiveGenomeSize 2805636231 \
 	--ignoreForNormalization chrX chrY \
 	--extendReads
 
+#- comment mouse for now
+: <<'END'
+
 bamCompare --bamfile1 CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam \
 	--bamfile2 CLAPAnalysis_output2/${input}.merged.mapped.mm.bam \
 	-o CLAPAnalysis_output2/${sample}.merged.mapped.mm.inputnormalised.bw \
-	--binSize 10 \
-	--normalizeUsing RPKM \
+	--binSize 100 \
+	--normalizeUsing CPM \
 	--effectiveGenomeSize 2467481008 \
 	--ignoreForNormalization chrX chrY \
 	--extendReads
 
+END

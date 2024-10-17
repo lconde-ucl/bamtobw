@@ -56,16 +56,16 @@ for strand in all forward reverse; do
     if [ "$strand" == "all" ]; then
 		bamCoverage --bam CLAPAnalysis_output2/${sample}.merged.mapped.hs.bam \
 			-o CLAPAnalysis_output2/${sample}.merged.mapped.hs.${strand}.bw \
-			--binSize 10 \
-			--normalizeUsing RPKM \
+			--binSize 100 \
+			--normalizeUsing CPM \
 			--effectiveGenomeSize 2805636231 \
 			--ignoreForNormalization chrX chrY \
 			--extendReads
 	else
 		bamCoverage --bam CLAPAnalysis_output2/${sample}.merged.mapped.hs.bam \
 			-o CLAPAnalysis_output2/${sample}.merged.mapped.hs.${strand}.bw \
-			--binSize 10 \
-			--normalizeUsing RPKM \
+			--binSize 100 \
+			--normalizeUsing CPM \
 			--effectiveGenomeSize 2805636231 \
 			--ignoreForNormalization chrX chrY \
 			--extendReads \
@@ -73,6 +73,9 @@ for strand in all forward reverse; do
 	fi
 done
 
+
+# comment mouse for now
+: <<'END'
 
 #------------------------
 #- MOUSE
@@ -102,16 +105,16 @@ for strand in all forward reverse; do
     if [ "$strand" == "all" ]; then
 		bamCoverage --bam CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam \
 			-o CLAPAnalysis_output2/${sample}.merged.mapped.mm.${strand}.bw \
-			--binSize 10 \
-			--normalizeUsing RPKM \
+			--binSize 100 \
+			--normalizeUsing CPM \
 			--effectiveGenomeSize 2467481008 \
 			--ignoreForNormalization chrX chrY \
 			--extendReads 
 	else
 		bamCoverage --bam CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam  \
 			-o CLAPAnalysis_output2/${sample}.merged.mapped.mm.${strand}.bw \
-			--binSize 10 \
-			--normalizeUsing RPKM \
+			--binSize 100 \
+			--normalizeUsing CPM \
 			--effectiveGenomeSize 2467481008 \
 			--ignoreForNormalization chrX chrY \
 			--extendReads \
@@ -119,4 +122,4 @@ for strand in all forward reverse; do
 	fi
 done
 
-
+END
