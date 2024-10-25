@@ -13,7 +13,6 @@
 ## qsub -t 1-35 1_bam_to_bigwig.qsub
 
 
-
 module load deeptools/3.0.2 
 module load samtools
 
@@ -24,102 +23,58 @@ paramfile="/home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw/samples.txt"
 
 sample=`sed -n ${number}p $paramfile | awk '{print $1}'`
 
+hs_effectivegenomesize=2805636231
+mm_effectivegenomesize=2467481008
+mixed_effectivegenomesize=5273117239
 
-#------------------------
-#- HUMAN
-#------------------------
-#- get the human bam (only canonical chrs, no repeats either)
-chrs_hs=$(echo $(seq 1 22 | sed 's/$/_human/' | sed 's/^/chr/') chrX_human chrY_human)
-samtools view -h CLAPAnalysis_output2/${sample}.merged.mapped.bam \
-	$chrs_hs \
-	> CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
+#wget http://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes
+#wget http://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes
 
-#- this still includes all the weird chrs in the header, so delete these
-perl -p -i -e 's/^.*human\:.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
-perl -p -i -e 's/^.*mouse.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
-perl -p -i -e 's/^.*random.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
-perl -p -i -e 's/^.*chrM.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
-perl -p -i -e 's/^.*chrUn.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
-perl -p -i -e 's/^.*chrE.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
+#mkdir -p CLAPAnalysis_output_repsMerged/bedgraphs
+#mkdir -p CLAPAnalysis_output_repsMerged/bigwigs
 
-#- remove the trailing "_human"
-perl -p -i -e 's/_human//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
-
-#- convert to bam
-samtools view -b CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam > CLAPAnalysis_output2/${sample}.merged.mapped.hs.bam
-rm -rf CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
-
-#- index
-samtools index CLAPAnalysis_output2/${sample}.merged.mapped.hs.bam
-
-for strand in all forward reverse; do
+#for strand in all forward reverse; do
+for strand in forward reverse; do
     if [ "$strand" == "all" ]; then
-		bamCoverage --bam CLAPAnalysis_output2/${sample}.merged.mapped.hs.bam \
-			-o CLAPAnalysis_output2/${sample}.merged.mapped.hs.${strand}.bw \
+		bamCoverage --bam CLAPAnalysis_output_repsMerged/${sample}.merged.mapped.bam \
+			-o CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg \
+			--outFileFormat bedgraph \
 			--binSize 100 \
 			--normalizeUsing CPM \
-			--effectiveGenomeSize 2805636231 \
+			--effectiveGenomeSize $mixed_effectivegenomesize \
 			--ignoreForNormalization chrX chrY \
 			--extendReads
 	else
-		bamCoverage --bam CLAPAnalysis_output2/${sample}.merged.mapped.hs.bam \
-			-o CLAPAnalysis_output2/${sample}.merged.mapped.hs.${strand}.bw \
+		bamCoverage --bam CLAPAnalysis_output_repsMerged/${sample}.merged.mapped.bam \
+			-o CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg \
+			--outFileFormat bedgraph \
 			--binSize 100 \
 			--normalizeUsing CPM \
-			--effectiveGenomeSize 2805636231 \
+			--effectiveGenomeSize $mixed_effectivegenomesize \
 			--ignoreForNormalization chrX chrY \
 			--extendReads \
 			--filterRNAstrand ${strand}
 	fi
-done
 
-
-# comment mouse for now
-: <<'END'
-
-#------------------------
-#- MOUSE
-#------------------------
-#- get the mouse bam (only canonical, no repeats either)
-chrs_mm=$(echo $(seq 1 19 | sed 's/$/_mouse/' | sed 's/^/chr/') chrX_mouse chrY_mouse)
-samtools view -h CLAPAnalysis_output2/${sample}.merged.mapped.bam \
-	$chrs_mm \
-	> CLAPAnalysis_output2/${sample}.merged.mapped.mm.sam
-
-#- this still includes all the weird chrs in the header, so delete these
-perl -p -i -e 's/^.*mouse\:.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.mm.sam
-perl -p -i -e 's/^.*human.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.mm.sam
-perl -p -i -e 's/^.*chrM.*\n$//g' CLAPAnalysis_output2/${sample}.merged.mapped.hs.sam
-
-#- remove the trailing "_mouse"
-perl -p -i -e 's/_mouse//g' CLAPAnalysis_output2/${sample}.merged.mapped.mm.sam
-
-#- convert to bam
-samtools view -b CLAPAnalysis_output2/${sample}.merged.mapped.mm.sam > CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam
-rm -rf CLAPAnalysis_output2/${sample}.merged.mapped.mm.sam
-
-#- index
-samtools index CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam
-
-for strand in all forward reverse; do
-    if [ "$strand" == "all" ]; then
-		bamCoverage --bam CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam \
-			-o CLAPAnalysis_output2/${sample}.merged.mapped.mm.${strand}.bw \
-			--binSize 100 \
-			--normalizeUsing CPM \
-			--effectiveGenomeSize 2467481008 \
-			--ignoreForNormalization chrX chrY \
-			--extendReads 
-	else
-		bamCoverage --bam CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam  \
-			-o CLAPAnalysis_output2/${sample}.merged.mapped.mm.${strand}.bw \
-			--binSize 100 \
-			--normalizeUsing CPM \
-			--effectiveGenomeSize 2467481008 \
-			--ignoreForNormalization chrX chrY \
-			--extendReads \
-			--filterRNAstrand ${strand}
+	#- reverse the "reverse" bedgraph
+	if [ "$strand" == "reverse" ]; then
+		awk '{ $4 = $4 * -1; print }' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg > CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}-negative.bg
+		mv CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}-negative.bg CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg
 	fi
+
+	#- get the human data (only canonical chrs, no repeats either)
+	awk '$1 ~ /^chr([1-9]_human$|1[0-9]_human$|2[0-2]_human$|X_human$|Y_human$)/' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg > CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.hs.${strand}.bg
+	#- remove the trailing "_human"
+	perl -p -i -e 's/_human//g' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.hs.${strand}.bg
+	#- get bedgraph to bigwig
+	bedGraphToBigWig CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.hs.${strand}.bg hg38.chrom.sizes CLAPAnalysis_output_repsMerged/bigwigs/${sample}.merged.mapped.hs.${strand}.bw
+
+	#- get the mouse data (only canonical chrs, no repeats either)
+	awk '$1 ~ /^chr([1-9]_mouse$|1[0-9]_mouse$|X_mouse$|Y_mouse$)/' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg > CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.mm.${strand}.bg
+	#- remove the trailing "_mouse"
+	perl -p -i -e 's/_mouse//g' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.mm.${strand}.bg
+	#- get bedgraph to bigwig
+	bedGraphToBigWig CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.mm.${strand}.bg mm10.chrom.sizes CLAPAnalysis_output_repsMerged/bigwigs/${sample}.merged.mapped.mm.${strand}.bw
+
 done
 
-END

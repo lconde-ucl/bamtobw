@@ -12,37 +12,42 @@
 
 ## qsub -t 1-20 3_bamcompare.qsub
 
-
 module load deeptools/3.0.2 
-
 
 number=$SGE_TASK_ID
 paramfile="/home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw/samples_paired.txt"
-
 
 sample=`sed -n ${number}p $paramfile | awk '{print $1}'`
 input=`sed -n ${number}p $paramfile | awk '{print $2}'`
 
 
-bamCompare --bamfile1 CLAPAnalysis_output2/${sample}.merged.mapped.hs.bam \
-	--bamfile2 CLAPAnalysis_output2/${input}.merged.mapped.hs.bam \
-	-o CLAPAnalysis_output2/${sample}.merged.mapped.hs.inputnormalised.bw \
+hs_effectivegenomesize=2805636231
+mm_effectivegenomesize=2467481008
+mixed_effectivegenomesize=5273117239
+
+bamCompare --bamfile1 CLAPAnalysis_output_repsMerged/${sample}.merged.mapped.bam \
+	--bamfile2 CLAPAnalysis_output_repsMerged/${input}.merged.mapped.bam \
+	-o CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.inputnormalised.bg \
+	--outFileFormat bedgraph \
 	--binSize 100 \
 	--normalizeUsing CPM \
-	--effectiveGenomeSize 2805636231 \
+	--effectiveGenomeSize $mixed_effectivegenomesize \
 	--ignoreForNormalization chrX chrY \
-	--extendReads
+	--extendReads \
+	--operation ratio
 
-#- comment mouse for now
-: <<'END'
 
-bamCompare --bamfile1 CLAPAnalysis_output2/${sample}.merged.mapped.mm.bam \
-	--bamfile2 CLAPAnalysis_output2/${input}.merged.mapped.mm.bam \
-	-o CLAPAnalysis_output2/${sample}.merged.mapped.mm.inputnormalised.bw \
-	--binSize 100 \
-	--normalizeUsing CPM \
-	--effectiveGenomeSize 2467481008 \
-	--ignoreForNormalization chrX chrY \
-	--extendReads
+#- get the human data (only canonical chrs, no repeats either)
+awk '$1 ~ /^chr([1-9]_human$|1[0-9]_human$|2[0-2]_human$|X_human$|Y_human$)/' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.inputnormalised.bg > CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.hs.inputnormalised.bg
+#- remove the trailing "_human"
+perl -p -i -e 's/_human//g' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.hs.inputnormalised.bg
+#- get bedgraph to bigwig
+bedGraphToBigWig CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.hs.inputnormalised.bg hg38.chrom.sizes CLAPAnalysis_output_repsMerged/bigwigs/${sample}.merged.mapped.hs.inputnormalised.bw
 
-END
+#- get the mouse data (only canonical chrs, no repeats either)
+awk '$1 ~ /^chr([1-9]_mouse$|1[0-9]_mouse$|X_mouse$|Y_mouse$)/' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.inputnormalised.bg > CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.mm.inputnormalised.bg
+#- remove the trailing "_mouse"
+perl -p -i -e 's/_mouse//g' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.mm.inputnormalised.bg
+#- get bedgraph to bigwig
+bedGraphToBigWig CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.mm.inputnormalised.bg mm10.chrom.sizes CLAPAnalysis_output_repsMerged/bigwigs/${sample}.merged.mapped.mm.inputnormalised.bw
+
