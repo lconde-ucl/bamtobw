@@ -1,0 +1,47 @@
+#!/bin/bash -l
+
+
+
+#$ -S /bin/bash
+#$ -l h_rt=12:0:0 
+#$ -l mem=20G
+#$ -pe smp 1
+#$ -N RICHARD
+#$ -wd /home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw
+
+
+## qsub -t 1-35 0_merge_bams.qsub
+
+
+module load samtools
+
+
+number=$SGE_TASK_ID
+paramfile="/home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw/samples.txt"
+
+
+sample=`sed -n ${number}p $paramfile | awk '{print $1}'`
+
+for type in "" "_withdups";do
+
+	mkdir -p CLAPAnalysis_output${type}_repsMerged
+	
+	bam="CLAPAnalysis_output${type}/${sample}.merged.mapped.bam"
+	bai="CLAPAnalysis_output${type}/${sample}.merged.mapped.bam.bai"
+	rep1="CLAPAnalysis_output${type}/${sample}_Rep1.merged.mapped.bam"
+	rep2="CLAPAnalysis_output${type}/${sample}_Rep2.merged.mapped.bam"
+	output="CLAPAnalysis_output${type}_repsMerged/${sample}.merged.mapped.bam"    
+	
+	if [[ -f "$rep1" && -f "$rep2" ]]; then
+		echo "Merging replicates for $sample"
+	        samtools merge "$output" "$rep1" "$rep2"
+		samtools index $output
+	elif [[ -f "$bam" ]]; then
+	        echo "No replicates for $sample"
+	        cp $bam $output
+		samtools index $output
+	else	
+        	echo "No BAM file found for $sample"
+	fi
+done
+

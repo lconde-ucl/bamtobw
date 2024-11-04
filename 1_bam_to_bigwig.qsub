@@ -13,7 +13,8 @@
 ## qsub -t 1-35 1_bam_to_bigwig.qsub
 
 
-module load deeptools/3.0.2 
+module load blic-modules
+module load deeptools/3.5.5
 module load samtools
 
 
@@ -30,51 +31,51 @@ mixed_effectivegenomesize=5273117239
 #wget http://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes
 #wget http://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes
 
-#mkdir -p CLAPAnalysis_output_repsMerged/bedgraphs
-#mkdir -p CLAPAnalysis_output_repsMerged/bigwigs
-
-#for strand in all forward reverse; do
-for strand in forward reverse; do
-    if [ "$strand" == "all" ]; then
-		bamCoverage --bam CLAPAnalysis_output_repsMerged/${sample}.merged.mapped.bam \
-			-o CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg \
-			--outFileFormat bedgraph \
-			--binSize 100 \
-			--normalizeUsing CPM \
-			--effectiveGenomeSize $mixed_effectivegenomesize \
-			--ignoreForNormalization chrX chrY \
-			--extendReads
-	else
-		bamCoverage --bam CLAPAnalysis_output_repsMerged/${sample}.merged.mapped.bam \
-			-o CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg \
-			--outFileFormat bedgraph \
-			--binSize 100 \
-			--normalizeUsing CPM \
-			--effectiveGenomeSize $mixed_effectivegenomesize \
-			--ignoreForNormalization chrX chrY \
-			--extendReads \
-			--filterRNAstrand ${strand}
-	fi
-
-	#- reverse the "reverse" bedgraph
-	if [ "$strand" == "reverse" ]; then
-		awk '{ $4 = $4 * -1; print }' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg > CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}-negative.bg
-		mv CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}-negative.bg CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg
-	fi
-
-	#- get the human data (only canonical chrs, no repeats either)
-	awk '$1 ~ /^chr([1-9]_human$|1[0-9]_human$|2[0-2]_human$|X_human$|Y_human$)/' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg > CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.hs.${strand}.bg
-	#- remove the trailing "_human"
-	perl -p -i -e 's/_human//g' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.hs.${strand}.bg
-	#- get bedgraph to bigwig
-	bedGraphToBigWig CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.hs.${strand}.bg hg38.chrom.sizes CLAPAnalysis_output_repsMerged/bigwigs/${sample}.merged.mapped.hs.${strand}.bw
-
-	#- get the mouse data (only canonical chrs, no repeats either)
-	awk '$1 ~ /^chr([1-9]_mouse$|1[0-9]_mouse$|X_mouse$|Y_mouse$)/' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg > CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.mm.${strand}.bg
-	#- remove the trailing "_mouse"
-	perl -p -i -e 's/_mouse//g' CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.mm.${strand}.bg
-	#- get bedgraph to bigwig
-	bedGraphToBigWig CLAPAnalysis_output_repsMerged/bedgraphs/${sample}.merged.mapped.mm.${strand}.bg mm10.chrom.sizes CLAPAnalysis_output_repsMerged/bigwigs/${sample}.merged.mapped.mm.${strand}.bw
-
+for type in "" "_withdups";do
+	mkdir -p CLAPAnalysis_output${type}_repsMerged/bedgraphs
+	mkdir -p CLAPAnalysis_output${type}_repsMerged/bigwigs
+	
+	for strand in all forward reverse; do
+		if [ "$strand" == "all" ]; then
+			bamCoverage --bam CLAPAnalysis_output${type}_repsMerged/${sample}.merged.mapped.bam \
+				-o CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg \
+				--outFileFormat bedgraph \
+				--binSize 100 \
+				--normalizeUsing CPM \
+				--effectiveGenomeSize $mixed_effectivegenomesize \
+				--ignoreForNormalization chrX chrY \
+				--extendReads
+		else
+			bamCoverage --bam CLAPAnalysis_output${type}_repsMerged/${sample}.merged.mapped.bam \
+				-o CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg \
+				--outFileFormat bedgraph \
+				--binSize 100 \
+				--normalizeUsing CPM \
+				--effectiveGenomeSize $mixed_effectivegenomesize \
+				--ignoreForNormalization chrX chrY \
+				--extendReads \
+				--filterRNAstrand ${strand}
+		fi
+	
+		#- reverse the "reverse" bedgraph
+		if [ "$strand" == "reverse" ]; then
+			awk '{ $4 = $4 * -1; print }' CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg > CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}-negative.bg
+			mv CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}-negative.bg CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg
+		fi
+	
+		#- get the human data (only canonical chrs, no repeats either)
+		awk '$1 ~ /^chr([1-9]_human$|1[0-9]_human$|2[0-2]_human$|X_human$|Y_human$)/' CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg > CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.hs.${strand}.bg
+		#- remove the trailing "_human"
+		perl -p -i -e 's/_human//g' CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.hs.${strand}.bg
+		#- get bedgraph to bigwig
+		bedGraphToBigWig CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.hs.${strand}.bg hg38.chrom.sizes CLAPAnalysis_output${type}_repsMerged/bigwigs/${sample}.merged.mapped.hs.${strand}.bw
+	
+		#- get the mouse data (only canonical chrs, no repeats either)
+		awk '$1 ~ /^chr([1-9]_mouse$|1[0-9]_mouse$|X_mouse$|Y_mouse$)/' CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.${strand}.bg > CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.mm.${strand}.bg
+		#- remove the trailing "_mouse"
+		perl -p -i -e 's/_mouse//g' CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.mm.${strand}.bg
+		#- get bedgraph to bigwig
+		bedGraphToBigWig CLAPAnalysis_output${type}_repsMerged/bedgraphs/${sample}.merged.mapped.mm.${strand}.bg mm10.chrom.sizes CLAPAnalysis_output${type}_repsMerged/bigwigs/${sample}.merged.mapped.mm.${strand}.bw
+	
+	done
 done
-
