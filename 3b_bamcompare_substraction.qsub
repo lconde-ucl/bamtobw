@@ -10,7 +10,7 @@
 #$ -wd /home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw
 
 
-## qsub -t 1-20 3b_bamcompare.qsub
+## qsub -t 1-20 3b_bamcompare_substraction.qsub
 
 
 module load blic-modules
@@ -47,7 +47,7 @@ for type in "" "_withdups";do
 		--ignoreForNormalization chrX chrY \
 		--extendReads \
 		--operation subtract \
-		--pseudocount 0 1
+		--pseudocount 0 0
 
 		
 	#- get the human data (only canonical chrs, no repeats either)
