@@ -44,7 +44,6 @@ for type in "" "_withdups";do
 		--binSize 100 \
 		--normalizeUsing CPM --scaleFactorsMethod None \
 		--effectiveGenomeSize $mixed_effectivegenomesize \
-		--ignoreForNormalization chrX chrY \
 		--extendReads \
 		--operation ratio \
 		--pseudocount 0 0
