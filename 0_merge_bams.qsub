@@ -10,7 +10,7 @@
 #$ -wd /home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw
 
 
-## qsub -t 1-35 0_merge_bams.qsub
+## qsub -t 1-37 0_merge_bams.qsub
 
 
 module load samtools

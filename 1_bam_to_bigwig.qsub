@@ -10,7 +10,7 @@
 #$ -wd /home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw
 
 
-## qsub -t 1-35 1_bam_to_bigwig.qsub
+## qsub -t 1-37 1_bam_to_bigwig.qsub
 
 
 module load blic-modules

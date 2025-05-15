@@ -10,7 +10,7 @@
 #$ -wd /home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw
 
 
-## qsub -t 1-20 3b_bamcompare_substraction.qsub
+## qsub -t 1-22 3b_bamcompare_substraction.qsub
 
 
 module load blic-modules

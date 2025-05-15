@@ -18,3 +18,5 @@ EED_PlusTag_CLIP	EED_PlusTag_Input
 EED_PlusTag_CLAP	EED_PlusTag_Input
 EED_MinusTag_CLIP	EED_MinusTag_Input
 EED_MinusTag_CLAP	EED_MinusTag_Input
+PTBP1_MinusTag_CLAP	PTBP1_MinusTag_Input
+SAFA_MinusTag_CLAP	SAFA_MinusTag_Input

@@ -10,7 +10,7 @@
 #$ -wd /home/regmond/Scratch/richard_CLAPAnalysis/2_bam_to_bw
 
 
-## qsub -t 1-20 3c_bamcompare_nopseudocount.qsub
+## qsub -t 1-22 3c_bamcompare_nopseudocount.qsub
 
 
 module load blic-modules
